@@ -40,10 +40,10 @@ def date_to_integer(raw):
     timestamp=int(x.timestamp())
     return timestamp
 
-date = datetime.now().strftime("%Y-%m-%d")
+#date = datetime.now().strftime("%Y-%m-%d")
+date = "2022-01-01"
 #print(date)
 count = 0
-posts_ignored = 0
 post_list = []
 
 # when there's no posts:
@@ -53,29 +53,34 @@ loop = True
 while loop == True:
     timestamp = date_to_integer(date)
     posts = client.tagged("thinspo", before=timestamp)
-    if len(posts) == 0:
+    if not type(posts) == list:
+        print(posts)
         break
     #count = count + len(posts)
     # update date: find oldest post (smallest timestamp)
 
     oldest = posts[0]
     curr_date = date_to_integer(oldest["date"])
-    if curr_date > 1640951999: # after 12/31/2021
-        posts_ignored = posts_ignored + 1
-        print("{x} posts ignored so far".format(x = posts_ignored))
-        print(oldest["date"])
-        continue
+
+    post_dict = {
+        "id": oldest["id"],
+        "date": oldest["date"].split(" ")[0],
+        "note_count": oldest["note_count"],
+        "tags": oldest["tags"]
+    }
+
+    list(filter(lambda item: item['month'] == month, month_data_list))[0]["posts"].append(post_dict)
     count = count + 1
     
     for j in range(1, len(posts)):
         oldest_date = date_to_integer(oldest["date"])
         curr_date = date_to_integer(posts[j]["date"])
 
-        if curr_date > 1640951999: # after 12/31/2021
-            posts_ignored = posts_ignored + 1
-            print("{x} posts ignored so far".format(x = posts_ignored))
-            print(posts[j]["date"])
-            continue
+        # if curr_date > 1640951999: # after 12/31/2021
+        #     posts_ignored = posts_ignored + 1
+        #     print("{x} posts ignored so far".format(x = posts_ignored))
+        #     print(posts[j]["date"])
+        #     continue
 
         if curr_date < 1483228800: # before 01/01/2017
             loop = False
@@ -83,7 +88,7 @@ while loop == True:
 
         # add post to correct month
         month = posts[j]["date"].rsplit('-', 1)[0]
-        print(month)
+        #print(month)
         post_dict = {
             "id": posts[j]["id"],
             "date": posts[j]["date"].split(" ")[0],
